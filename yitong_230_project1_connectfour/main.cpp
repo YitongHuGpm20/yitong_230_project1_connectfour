@@ -1,11 +1,9 @@
 #include<iostream>
 #include<string>
-#include<cstdlib>
-#include<Windows.h>
 using namespace std;
 
 void StartGame();
-void InsertPiece();
+void InsertOrRemove();
 bool IsWon();
 void SwitchPlayer();
 void EndGame();
@@ -22,16 +20,16 @@ int newx, newy;
 bool stopGame = false;
 bool columnFull[20];
 bool restartGame = true;
-bool wrap = true;
+bool wrap = false;
+bool drop = false;
 
 int main() {
 	system("color 1f");
-	
 	do {
 		GameSetUp();
 		StartGame();
 		do {
-			InsertPiece();
+			InsertOrRemove();
 			if (wrap == false) {
 				IsWon();
 			}
@@ -87,6 +85,25 @@ void GameSetUp() {
 		if (yn == 'Y' || yn == 'y') {
 			wrap = true;
 		}
+		else if (yn == 'N' || yn == 'n') {
+			wrap = false;
+		}
+		else {
+			cout << "Please input y or n." << endl;
+			keepAsk = true;
+		}
+	} while (keepAsk == true);
+	do {
+		cout << "Do you want to enable Remove Bottom Mode (y/n)?" << endl;
+		char yn;
+		cin >> yn;
+		keepAsk = false;
+		if (yn == 'Y' || yn == 'y') {
+			drop = true;
+		}
+		else if (yn == 'N' || yn == 'n') {
+			drop = false;
+		}
 		else {
 			cout << "Please input y or n." << endl;
 			keepAsk = true;
@@ -95,7 +112,7 @@ void GameSetUp() {
 	system("cls");
 }
 
-void StartGame() {
+void StartGame() { 
 	for (int n = 1; n <= columns; n++) {
 		cout << " " << n;
 	}
@@ -118,20 +135,22 @@ void StartGame() {
 	stopGame = false;
 }
 
-void InsertPiece() {
+void InsertOrRemove() {
 	if (isPlayerOne == true) {
-		cout << "Player X's turn! Type the column number to insert a piece." << endl;
+		cout << "Player X's turn! Type the column number to insert or remove a piece." << endl;
 	}
 	else {
-		cout << "Player O's turn! Type the column number to insert a piece." << endl;
+		cout << "Player O's turn! Type the column number to insert or remove a piece." << endl;
 	}
 	int input, s;
 	bool stopSelect = false;
+	string cur;
+	cur = isPlayerOne == true ? 'X' : 'O';
 	do {
 		cin >> input;
 		system("cls");
 		s = input - 1;
-		if (s >= 0 && s < columns && columnFull[s] == false) {
+		if (drop == true && board[rows - 1][s] == cur) {
 			for (int n = 1; n <= columns; n++) {
 				cout << " " << n;
 			}
@@ -139,87 +158,230 @@ void InsertPiece() {
 			for (int i = 0; i < rows; i++) {
 				cout << "|";
 				for (int j = 0; j < columns; j++) {
-					if (i == rows-1-top[s] && j == s) {
-						if (isPlayerOne == true) {
-							board[i][j] = "X";
-						}
-						else {
-							board[i][j] = "O";
-						}
-						cout << board[i][j] << "|";
-						newx = j;
-						newy = i;
-					}
-					else {
-						cout << board[i][j] << "|";
-					}
+					cout << board[i][j] << "|";
 				}
 				cout << endl;
 			}
-			top[s] += 1;
-			if (top[s] == rows) {
-				columnFull[s] = true;
-			}
-			stopSelect = true;
-		}
-		else if (s >= 0 && s <= columns && columnFull[s] == true) {
-			for (int n = 1; n <= columns; n++) {
-				cout << " " << n;
-			}
-			cout << endl;
-			for (int i = 0; i < rows; i++) {
-				cout << "|";
-				for (int j = 0; j < columns; j++) {
-					if (i == rows-1-top[s] && j == s) {
-						if (isPlayerOne == true) {
-							board[i][j] = "X";
+			cout << "If you want to insert a piece on the top, type 'A'." << endl;
+			cout << "If you want to remove a piece from the bottom, type 'B'." << endl;
+			char select;
+			bool keepAsk = false;
+			do {
+				cin >> select;
+				system("cls");
+				keepAsk = false;
+				if (select == 'A' || select == 'a') {
+					if (s >= 0 && s < columns && columnFull[s] == false) {
+						for (int n = 1; n <= columns; n++) {
+							cout << " " << n;
 						}
-						else {
-							board[i][j] = "O";
+						cout << endl;
+						for (int i = 0; i < rows; i++) {
+							cout << "|";
+							for (int j = 0; j < columns; j++) {
+								if (i == rows - 1 - top[s] && j == s) {
+									if (isPlayerOne == true) {
+										board[i][j] = "X";
+									}
+									else {
+										board[i][j] = "O";
+									}
+									cout << board[i][j] << "|";
+									newx = j;
+									newy = i;
+								}
+								else {
+									cout << board[i][j] << "|";
+								}
+							}
+							cout << endl;
 						}
-						cout << board[i][j] << "|";
-						newx = j;
-						newy = i;
+						top[s] += 1;
+						if (top[s] == rows) {
+							columnFull[s] = true;
+						}
+						stopSelect = true;
+					}
+					else if (s >= 0 && s <= columns && columnFull[s] == true) {
+						for (int n = 1; n <= columns; n++) {
+							cout << " " << n;
+						}
+						cout << endl;
+						for (int i = 0; i < rows; i++) {
+							cout << "|";
+							for (int j = 0; j < columns; j++) {
+								if (i == rows - 1 - top[s] && j == s) {
+									if (isPlayerOne == true) {
+										board[i][j] = "X";
+									}
+									else {
+										board[i][j] = "O";
+									}
+									cout << board[i][j] << "|";
+									newx = j;
+									newy = i;
+								}
+								else {
+									cout << board[i][j] << "|";
+								}
+							}
+							cout << endl;
+						}
+						cout << "No." << input << " line is already full." << endl;
+						cout << "Please select another number from 1 to 7." << endl;
 					}
 					else {
-						cout << board[i][j] << "|";
+						for (int n = 1; n <= columns; n++) {
+							cout << " " << n;
+						}
+						cout << endl;
+						for (int i = 0; i < rows; i++) {
+							cout << "|";
+							for (int j = 0; j < columns; j++) {
+								if (i == rows - 1 - top[s] && j == s) {
+									if (isPlayerOne == true) {
+										board[i][j] = "X";
+									}
+									else {
+										board[i][j] = "O";
+									}
+									cout << board[i][j] << "|";
+									newx = j;
+									newy = i;
+								}
+								else {
+									cout << board[i][j] << "|";
+								}
+							}
+							cout << endl;
+						}
+						cout << "Please select a number between 1 to 7." << endl;
 					}
+
 				}
-				cout << endl;
-			}
-			cout << "No." << input << " line is already full." << endl;
-			cout << "Please select another number from 1 to 7." << endl;
-		}
-		else if (input == 999) {    //testing, force to exist
-			stopSelect = true;
-			stopGame = true;;
+				else if (select == 'B' || select == 'b') {
+					for (int n = 1; n <= columns; n++) {
+						cout << " " << n;
+					}
+					cout << endl;
+					//that column drops down
+					for (int i = rows - 1; i >= 0; i--) {
+						if (i == 0) {
+							board[i][s] = ".";
+						}
+						else {
+							board[i][s] = board[i - 1][s];
+						}
+					}
+					for (int i = 0; i < rows; i++) {
+						cout << "|";
+						for (int j = 0; j < columns; j++) {
+							if (i == rows - 1 - top[s] && j == s) {
+								newx = j;
+								newy = i;
+							}
+							cout << board[i][j] << "|";
+						}
+						cout << endl;
+					}
+					top[s] -= 1;
+					columnFull[s] = false;
+					stopSelect = true;
+				}
+				else {
+					keepAsk = true;
+					cout << "Please type A or B." << endl;
+				}
+			} while (keepAsk == true);
 		}
 		else {
-			for (int n = 1; n <= columns; n++) {
-				cout << " " << n;
-			}
-			cout << endl;
-			for (int i = 0; i < rows; i++) {
-				cout << "|";
-				for (int j = 0; j < columns; j++) {
-					if (i == rows-1-top[s] && j == s) {
-						if (isPlayerOne == true) {
-							board[i][j] = "X";
-						}
-						else {
-							board[i][j] = "O";
-						}
-						cout << board[i][j] << "|";
-						newx = j;
-						newy = i;
-					}
-					else {
-						cout << board[i][j] << "|";
-					}
+			if (s >= 0 && s < columns && columnFull[s] == false) {
+				for (int n = 1; n <= columns; n++) {
+					cout << " " << n;
 				}
 				cout << endl;
+				for (int i = 0; i < rows; i++) {
+					cout << "|";
+					for (int j = 0; j < columns; j++) {
+						if (i == rows - 1 - top[s] && j == s) {
+							if (isPlayerOne == true) {
+								board[i][j] = "X";
+							}
+							else {
+								board[i][j] = "O";
+							}
+							cout << board[i][j] << "|";
+							newx = j;
+							newy = i;
+						}
+						else {
+							cout << board[i][j] << "|";
+						}
+					}
+					cout << endl;
+				}
+				top[s] += 1;
+				if (top[s] == rows) {
+					columnFull[s] = true;
+				}
+				stopSelect = true;
 			}
-			cout << "Please select a number between 1 to 7." << endl;
+			else if (s >= 0 && s <= columns && columnFull[s] == true) {
+				for (int n = 1; n <= columns; n++) {
+					cout << " " << n;
+				}
+				cout << endl;
+				for (int i = 0; i < rows; i++) {
+					cout << "|";
+					for (int j = 0; j < columns; j++) {
+						if (i == rows - 1 - top[s] && j == s) {
+							if (isPlayerOne == true) {
+								board[i][j] = "X";
+							}
+							else {
+								board[i][j] = "O";
+							}
+							cout << board[i][j] << "|";
+							newx = j;
+							newy = i;
+						}
+						else {
+							cout << board[i][j] << "|";
+						}
+					}
+					cout << endl;
+				}
+				cout << "No." << input << " line is already full." << endl;
+				cout << "Please select another number from 1 to 7." << endl;
+			}
+			else {
+				for (int n = 1; n <= columns; n++) {
+					cout << " " << n;
+				}
+				cout << endl;
+				for (int i = 0; i < rows; i++) {
+					cout << "|";
+					for (int j = 0; j < columns; j++) {
+						if (i == rows - 1 - top[s] && j == s) {
+							if (isPlayerOne == true) {
+								board[i][j] = "X";
+							}
+							else {
+								board[i][j] = "O";
+							}
+							cout << board[i][j] << "|";
+							newx = j;
+							newy = i;
+						}
+						else {
+							cout << board[i][j] << "|";
+						}
+					}
+					cout << endl;
+				}
+				cout << "Please select a number between 1 to 7." << endl;
+			}
+
 		}
 	} while (stopSelect == false);
 }
@@ -366,7 +528,7 @@ bool IsWonSSS() {
 		}
 	}
 	else {
-		for (i = newx + 1, j = newy; i < rows && count++ < num; i++) {
+		for (i = newx + 1, j = newy; i < columns && count++ < num; i++) {
 			if (i == columns - 1 && board[j][i] == cur) {
 				winflag++;
 				for (m = columns - 1, n = newy; m > newx && count++ < num; m--) {
@@ -395,7 +557,7 @@ bool IsWonSSS() {
 	}
 	
 	//up or down
-	for (i = newx, j = newy + 1; j < columns && count++ < num; j++) {
+	for (i = newx, j = newy + 1; j < rows && count++ < num; j++) {
 		if (board[j][i] == cur) {
 			winflag++;
 		}
@@ -422,8 +584,8 @@ bool IsWonSSS() {
 
 	//down-right or up-left
 	//down-right
-	if (newx == columns - 1) {
-		for (m = 0, n = newy + 1; m < newx && n < columns && count++ < num; m++, n++) {
+	if (newx == columns - 1 && newy != rows - 1) {
+		for (m = 0, n = newy + 1; m < newx && n < rows && count++ < num; m++, n++) {
 			if (board[n][m] == cur) {
 				winflag++;
 			}
@@ -433,10 +595,10 @@ bool IsWonSSS() {
 		}
 	}
 	else {
-		for (i = newx + 1, j = newy + 1; i < rows && j < columns && count++ < num; i++, j++) {
-			if (i == columns - 1 && board[j][i] == cur) {
+		for (i = newx + 1, j = newy + 1; i < columns && j < rows && count++ < num; i++, j++) {
+			if (i == columns - 1 && board[j][i] == cur && j != rows - 1) {
 				winflag++;
-				for (m = 0, n = newy + 1; m < newx && n < columns && count++ < num; m++, n++) {
+				for (m = 0, n = newy + 1; m < newx && n < rows && count++ < num; m++, n++) {
 					if (board[n][m] == cur) {
 						winflag++;
 					}
@@ -455,7 +617,7 @@ bool IsWonSSS() {
 	}
 	count = 0;
 	//up-left
-	if (newx == 0) {
+	if (newx == 0 && newy != 0) {
 		for (m = columns - 1, n = newy - 1; m > newx && n>= 0 && count++ < num; m--, n--) {
 			if (board[n][m] == cur) {
 				winflag++;
@@ -468,7 +630,7 @@ bool IsWonSSS() {
 	else {
 		for (i = newx - 1, j = newy - 1; i >= 0 && j >= 0 && count++ < num; i--, j--)
 		{
-			if (i == 0 && board[j][i] == cur) {
+			if (i == 0 && board[j][i] == cur && j != 0) {
 				winflag++;
 				for (m = columns - 1, n = newy - 1; m > newx && n >= 0 && count++ < num; m--, n--) {
 					if (board[n][m] == cur) {
@@ -497,8 +659,8 @@ bool IsWonSSS() {
 
 	//down-left or up-right
 	//down-left
-	if (newx == 0) {
-		for (m = columns - 1, n = newy + 1; m > newx && n < columns && count++ < num; m--, n++) {
+	if (newx == 0 && newy != rows - 1) {
+		for (m = columns - 1, n = newy + 1; m > newx && n < rows && count++ < num; m--, n++) {
 			if (board[n][m] == cur) {
 				winflag++;
 			}
@@ -508,11 +670,11 @@ bool IsWonSSS() {
 		}
 	}
 	else {
-		for (i = newx - 1, j = newy + 1; i >= 0 && j < columns && count++ < num; i--, j++)
+		for (i = newx - 1, j = newy + 1; i >= 0 && j < rows && count++ < num; i--, j++)
 		{
-			if (i == 0 && board[j][i] == cur) {
+			if (i == 0 && board[j][i] == cur && j != rows - 1) {
 				winflag++;
-				for (m = columns - 1, n = newy + 1; m > newx && n < columns && count++ < num; m--, n++) {
+				for (m = columns - 1, n = newy + 1; m > newx && n < rows && count++ < num; m--, n++) {
 					if (board[n][m] == cur) {
 						winflag++;
 					}
@@ -531,7 +693,7 @@ bool IsWonSSS() {
 	}
 	count = 0;
 	//up-right
-	if (newx == columns - 1) {
+	if (newx == columns - 1 && newy != 0) {
 		for (m = 0, n = newy - 1; m < newx && n >= 0 && count++ < num; m++, n--) {
 			if (board[n][m] == cur) {
 				winflag++;
@@ -542,8 +704,8 @@ bool IsWonSSS() {
 		}
 	}
 	else {
-		for (i = newx + 1, j = newy - 1; i < rows && newy >= 0 && count++ < num; i++, j--) {
-			if (i == columns - 1 && board[j][i] == cur) {
+		for (i = newx + 1, j = newy - 1; i < columns && newy >= 0 && count++ < num; i++, j--) {
+			if (i == columns - 1 && board[j][i] == cur && j != 0) {
 				winflag++;
 				for (m = 0, n = newy - 1; m < newx && n >= 0 && count++ < num; m++, n--) {
 					if (board[n][m] == cur) {
