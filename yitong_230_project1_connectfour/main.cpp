@@ -2,23 +2,23 @@
 #include<string>
 using namespace std;
 
+void GameSetUp();
 void StartGame();
 void InsertOrRemove();
 bool IsWon();
-void SwitchPlayer();
-void EndGame();
+bool IsWonWrap();
 bool IsTie();
+bool StopGame();
+void SwitchPlayer();
 void RestartGame();
-void GameSetUp();
-bool IsWonSSS();
 
 int rows, columns, num;
 int top[20];
 string board[20][20];
-bool isPlayerOne = true;
-int newx, newy;
-bool stopGame = false;
 bool columnFull[20];
+int newx, newy;
+bool isPlayerOne = true;
+bool stopGame = false;
 bool restartGame = true;
 bool wrap = false;
 bool drop = false;
@@ -30,16 +30,15 @@ int main() {
 		StartGame();
 		do {
 			InsertOrRemove();
-			if (wrap == false) {
+			if (wrap == false) { //Wrap Around Mode On/Off
 				IsWon();
 			}
 			else {
-				cout << "hello world";
-				IsWonSSS();
+				IsWonWrap();
 			}
-			EndGame();
+			StopGame();
 			SwitchPlayer();
-		} while (stopGame == false);
+		} while (StopGame() == false);
 		RestartGame();
 	} while (restartGame == true);
 	
@@ -474,7 +473,7 @@ bool IsWon() {
 	return false;
 }
 
-bool IsWonSSS() {
+bool IsWonWrap() {
 	int count = 0;
 	int winflag = 1;
 	string cur;
@@ -755,22 +754,22 @@ bool IsTie() {
 	}
 }
 
-void EndGame() {
+bool StopGame() {
 	if (IsTie() == true) {
 		cout << "The game ended in a draw." << endl;
-		stopGame = true;
+		return true;
 	}
-	else 
-		if (IsWon() == true || IsWonSSS() == true) {
+	if (IsTie() == false || IsWon() == true || IsWonWrap() == true) {
 		if (isPlayerOne) {
 			cout << "Player X won!" << endl;
-			stopGame = true;
+			return true;
 		}
 		else {
 			cout << "Player O won!" << endl;
-			stopGame = true;
+			return true;
 		}
 	}
+	return false;
 }
 
 void RestartGame() {
@@ -796,5 +795,4 @@ void RestartGame() {
 			keepAsk = true;
 		}
 	} while (keepAsk == true);
-	
 }
