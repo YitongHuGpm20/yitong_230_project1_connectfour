@@ -156,21 +156,6 @@ void InsertOrRemove() {
 			cin >> input;
 		}
 		cin.ignore(10000, '\n');
-		/*do {
-			cin >> input;
-			validInput = false;
-			for (checkInput = 1; checkInput <= columns; checkInput++) {
-				if (input == checkInput) {
-					validInput = true;
-					break;
-				}
-			}
-			if (validInput == false) {
-				cin.clear();
-				cin.ignore();
-				cout << "Please select a valid number." << endl;
-			}
-		} while (validInput == false);*/
 		system("cls");
 		s = input - 1;
 		if (drop == true && board[rows - 1][s] == cur) {
