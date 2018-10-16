@@ -9,6 +9,7 @@ void InsertOrRemove();
 void IsWon();
 void IsWonWrap();
 void IsTie();
+void WonRecord();
 void StopGame();
 void SwitchPlayer();
 void RestartGame();
@@ -28,6 +29,7 @@ bool restartGame = true;
 bool wrap = false;
 bool drop = false;
 bool checkDone = false;
+int xWon = 0, oWon = 0;
 
 int main() {
 	system("color 1f");
@@ -36,8 +38,6 @@ int main() {
 		StartGame();
 		do {
 			InsertOrRemove();
-			IsTie();
-			
 			StopGame();
 			SwitchPlayer();
 		} while (stopGame == false);
@@ -129,6 +129,8 @@ void StartGame() {
 	isWon = false;
 	isWonWrap = false;
 	isTie = false;
+	xWon = 0;
+	oWon = 0;
 }
 
 void InsertOrRemove() {
@@ -367,6 +369,7 @@ void InsertOrRemove() {
 	} while (stopSelect == false);
 	keepNewX = newx;
 	keepNewY = newy;
+	IsTie();
 	for (int i = 1; i <= top[s]; i++) {
 		if (newy >= rows - top[s]) {
 			if (wrap == false)//Wrap Around Mode On/Off
@@ -374,8 +377,19 @@ void InsertOrRemove() {
 			else
 				IsWonWrap();
 			newy--;
+			WonRecord();
 		}
 	}
+}
+
+void IsTie() {
+	int fullLine = 0;
+	for (int i = 0; i < columns; i++) {
+		if (top[i] == rows)
+			fullLine += 1;
+	}
+	if (fullLine == columns)
+		isTie = true;
 }
 
 void IsWon() {
@@ -673,6 +687,15 @@ void IsWonWrap() {
 		winflag = 1;
 }
 
+void WonRecord() {
+	if (isWon == true || isWonWrap == true) {
+		if (board[newy][newy] == 'X')
+			xWon++;
+		else
+			oWon++;
+	}
+}
+
 void SwitchPlayer() {
 	if (isPlayerOne)
 		isPlayerOne = false;
@@ -680,24 +703,27 @@ void SwitchPlayer() {
 		isPlayerOne = true;
 }
 
-void IsTie() {
-	int fullLine = 0;
-	for (int i = 0; i < columns; i++) {
-		if (top[i] == rows)
-			fullLine += 1;
-	}
-	if (fullLine == columns)
-		isTie = true;
-}
 
 void StopGame() {
-	if (isWon == true || isWonWrap == true) {
+	if (xWon > 0 && oWon > 0) {
+		cout << "The game ended in a draw." << endl;
+		stopGame = true;
+	}
+	else if (xWon > 0 && oWon == 0) {
+		cout << "Player X won!" << endl;
+		stopGame = true;
+	}
+	else if (oWon > 0 && xWon == 0) {
+		cout << "Player X won!" << endl;
+		stopGame = true;
+	}
+	/*if (isWon == true || isWonWrap == true) {
 		if (board[keepNewY][keepNewX] == 'X')
 			cout << "Player X won!" << endl;
 		else
 			cout << "Player O won!" << endl;
 		stopGame = true;
-	}
+	}*/
 	else if (isWon == false && isWonWrap == false && isTie == true) {
 		cout << "The game ended in a draw." << endl;
 		stopGame = true;
