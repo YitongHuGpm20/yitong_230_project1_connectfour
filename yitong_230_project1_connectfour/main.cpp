@@ -18,6 +18,7 @@ int top[20];
 char board[20][20];
 bool columnFull[20];
 int newx, newy;
+int keepNewX, keepNewY;
 bool isPlayerOne = true;
 bool isWon = false;
 bool isWonWrap = false;
@@ -26,6 +27,7 @@ bool stopGame = false;
 bool restartGame = true;
 bool wrap = false;
 bool drop = false;
+bool checkDone = false;
 
 int main() {
 	system("color 1f");
@@ -35,12 +37,7 @@ int main() {
 		do {
 			InsertOrRemove();
 			IsTie();
-			if (wrap == false) {//Wrap Around Mode On/Off
-				IsWon();
-			}
-			else {
-				IsWonWrap();
-			}
+			
 			StopGame();
 			SwitchPlayer();
 		} while (stopGame == false);
@@ -255,7 +252,7 @@ void InsertOrRemove() {
 						}
 						cout << "Please select a number between 1 to " << rows << "." << endl;
 					}
-
+					checkDone = true;
 				}
 				else if (select == 'B' || select == 'b') { //remove a piece from the bottom of that column
 					for (int n = 1; n <= columns; n++) {
@@ -365,8 +362,20 @@ void InsertOrRemove() {
 				}
 				cout << "Please select a number between 1 to " << rows << "." << endl;
 			}
+			checkDone = true;
 		}
 	} while (stopSelect == false);
+	keepNewX = newx;
+	keepNewY = newy;
+	for (int i = 1; i <= top[s]; i++) {
+		if (newy >= rows - top[s]) {
+			if (wrap == false)//Wrap Around Mode On/Off
+				IsWon();
+			else
+				IsWonWrap();
+			newy--;
+		}
+	}
 }
 
 void IsWon() {
@@ -683,7 +692,7 @@ void IsTie() {
 
 void StopGame() {
 	if (isWon == true || isWonWrap == true) {
-		if (board[newy][newx] == 'X')
+		if (board[keepNewY][keepNewX] == 'X')
 			cout << "Player X won!" << endl;
 		else
 			cout << "Player O won!" << endl;
