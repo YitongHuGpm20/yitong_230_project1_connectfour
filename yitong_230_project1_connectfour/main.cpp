@@ -504,7 +504,7 @@ void IsWonWrap() {
 		for (i = newx + 1, j = newy; i < columns && count++ < num; i++) {
 			if (i == columns - 1 && board[j][i] == cur) {
 				winflag++;
-				for (m = columns - 1, n = newy; m > newx && count++ < num; m--) {
+				for (m = 0, n = newy; m < newx && count++ < num; m++) {
 					if (board[n][m] == cur)
 						winflag++;
 					else
@@ -557,7 +557,7 @@ void IsWonWrap() {
 		for (i = newx + 1, j = newy + 1; i < columns && j < rows && count++ < num; i++, j++) {
 			if (i == columns - 1 && board[j][i] == cur && j != rows - 1) {
 				winflag++;
-				for (m = 0, n = newy + 1; m < newx && n < rows && count++ < num; m++, n++) {
+				for (m = 0, n = j + 1; m < newx && n < rows && count++ < num; m++, n++) {
 					if (board[n][m] == cur)
 						winflag++;
 					else
@@ -585,7 +585,7 @@ void IsWonWrap() {
 		{
 			if (i == 0 && board[j][i] == cur && j != 0) {
 				winflag++;
-				for (m = columns - 1, n = newy - 1; m > newx && n >= 0 && count++ < num; m--, n--) {
+				for (m = columns - 1, n = j - 1; m > newx && n >= 0 && count++ < num; m--, n--) {
 					if (board[n][m] == cur)
 						winflag++;
 					else
@@ -619,7 +619,7 @@ void IsWonWrap() {
 		{
 			if (i == 0 && board[j][i] == cur && j != rows - 1) {
 				winflag++;
-				for (m = columns - 1, n = newy + 1; m > newx && n < rows && count++ < num; m--, n++) {
+				for (m = columns - 1, n = j + 1; m > newx && n < rows && count++ < num; m--, n++) {
 					if (board[n][m] == cur)
 						winflag++;
 					else
@@ -646,7 +646,7 @@ void IsWonWrap() {
 		for (i = newx + 1, j = newy - 1; i < columns && newy >= 0 && count++ < num; i++, j--) {
 			if (i == columns - 1 && board[j][i] == cur && j != 0) {
 				winflag++;
-				for (m = 0, n = newy - 1; m < newx && n >= 0 && count++ < num; m++, n--) {
+				for (m = 0, n = j - 1; m < newx && n >= 0 && count++ < num; m++, n--) {
 					if (board[n][m] == cur)
 						winflag++;
 					else
