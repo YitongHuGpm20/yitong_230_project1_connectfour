@@ -1,23 +1,27 @@
 #include<iostream>
 #include<string>
+#include<limits>
 using namespace std;
 
 void GameSetUp();
 void StartGame();
 void InsertOrRemove();
-bool IsWon();
-bool IsWonWrap();
-bool IsTie();
-bool StopGame();
+void IsWon();
+void IsWonWrap();
+void IsTie();
+void StopGame();
 void SwitchPlayer();
 void RestartGame();
 
 int rows, columns, num;
 int top[20];
-string board[20][20];
+char board[20][20];
 bool columnFull[20];
 int newx, newy;
 bool isPlayerOne = true;
+bool isWon = false;
+bool isWonWrap = false;
+bool isTie = false;
 bool stopGame = false;
 bool restartGame = true;
 bool wrap = false;
@@ -30,7 +34,8 @@ int main() {
 		StartGame();
 		do {
 			InsertOrRemove();
-			if (wrap == false) { //Wrap Around Mode On/Off
+			IsTie();
+			if (wrap == false) {//Wrap Around Mode On/Off
 				IsWon();
 			}
 			else {
@@ -38,10 +43,9 @@ int main() {
 			}
 			StopGame();
 			SwitchPlayer();
-		} while (StopGame() == false);
+		} while (stopGame == false);
 		RestartGame();
 	} while (restartGame == true);
-	
 	cout << endl;
 	system("pause");
 	return 0;
@@ -67,7 +71,7 @@ void GameSetUp() {
 			keepAsk = true;
 		}
 	} while (keepAsk == true);
-	do {
+	do { 
 		cout << "How many linked pieces do you require to win (3-20)?" << endl;
 		cin >> num;
 		keepAsk = false;
@@ -81,12 +85,10 @@ void GameSetUp() {
 		char yn;
 		cin >> yn;
 		keepAsk = false;
-		if (yn == 'Y' || yn == 'y') {
+		if (yn == 'Y' || yn == 'y')
 			wrap = true;
-		}
-		else if (yn == 'N' || yn == 'n') {
+		else if (yn == 'N' || yn == 'n')
 			wrap = false;
-		}
 		else {
 			cout << "Please input y or n." << endl;
 			keepAsk = true;
@@ -97,12 +99,10 @@ void GameSetUp() {
 		char yn;
 		cin >> yn;
 		keepAsk = false;
-		if (yn == 'Y' || yn == 'y') {
+		if (yn == 'Y' || yn == 'y')
 			drop = true;
-		}
-		else if (yn == 'N' || yn == 'n') {
+		else if (yn == 'N' || yn == 'n')
 			drop = false;
-		}
 		else {
 			cout << "Please input y or n." << endl;
 			keepAsk = true;
@@ -112,26 +112,26 @@ void GameSetUp() {
 }
 
 void StartGame() { 
-	for (int n = 1; n <= columns; n++) {
-		cout << " " << n;
-	}
+	for (int n = 1; n <= columns; n++)
+		cout << ' ' << n;
 	cout << endl;
 	for (int i = 0; i < rows; i++) {
-		cout << "|";
+		cout << '|';
 		for (int j = 0; j < columns; j++) {
-			board[i][j] = ".";
-			cout << board[i][j] << "|";
+			board[i][j] = '.';
+			cout << board[i][j] << '|';
 		}
 		cout << endl;
 	}
-	for (int t = 0; t < columns; t++) {
+	for (int t = 0; t < columns; t++)
 		top[t] = 0;
-	}
-	for (int c = 0; c < columns; c++) {
+	for (int c = 0; c < columns; c++)
 		columnFull[c] = false;
-	}
 	isPlayerOne = true;
 	stopGame = false;
+	isWon = false;
+	isWonWrap = false;
+	isTie = false;
 }
 
 void InsertOrRemove() {
@@ -143,21 +143,45 @@ void InsertOrRemove() {
 	}
 	int input, s;
 	bool stopSelect = false;
-	string cur;
+	char cur;
 	cur = isPlayerOne == true ? 'X' : 'O';
+	int checkInput;
+	bool validInput = false;
 	do {
 		cin >> input;
+		while (!cin.good()) {
+			cin.clear();
+			cin.ignore(10000, '\n');
+			cout << "Please try again." << endl;
+			cin >> input;
+		}
+		cin.ignore(10000, '\n');
+		/*do {
+			cin >> input;
+			validInput = false;
+			for (checkInput = 1; checkInput <= columns; checkInput++) {
+				if (input == checkInput) {
+					validInput = true;
+					break;
+				}
+			}
+			if (validInput == false) {
+				cin.clear();
+				cin.ignore();
+				cout << "Please select a valid number." << endl;
+			}
+		} while (validInput == false);*/
 		system("cls");
 		s = input - 1;
 		if (drop == true && board[rows - 1][s] == cur) {
 			for (int n = 1; n <= columns; n++) {
-				cout << " " << n;
+				cout << ' ' << n;
 			}
 			cout << endl;
 			for (int i = 0; i < rows; i++) {
-				cout << "|";
+				cout << '|';
 				for (int j = 0; j < columns; j++) {
-					cout << board[i][j] << "|";
+					cout << board[i][j] << '|';
 				}
 				cout << endl;
 			}
@@ -172,114 +196,102 @@ void InsertOrRemove() {
 				if (select == 'A' || select == 'a') {
 					if (s >= 0 && s < columns && columnFull[s] == false) {
 						for (int n = 1; n <= columns; n++) {
-							cout << " " << n;
+							cout << ' ' << n;
 						}
 						cout << endl;
 						for (int i = 0; i < rows; i++) {
-							cout << "|";
+							cout << '|';
 							for (int j = 0; j < columns; j++) {
 								if (i == rows - 1 - top[s] && j == s) {
-									if (isPlayerOne == true) {
-										board[i][j] = "X";
-									}
-									else {
-										board[i][j] = "O";
-									}
-									cout << board[i][j] << "|";
+									if (isPlayerOne == true)
+										board[i][j] = 'X';
+									else
+										board[i][j] = 'O';
+									cout << board[i][j] << '|';
 									newx = j;
 									newy = i;
 								}
-								else {
-									cout << board[i][j] << "|";
-								}
+								else
+									cout << board[i][j] << '|';
 							}
 							cout << endl;
 						}
 						top[s] += 1;
-						if (top[s] == rows) {
+						if (top[s] == rows)
 							columnFull[s] = true;
-						}
 						stopSelect = true;
 					}
 					else if (s >= 0 && s <= columns && columnFull[s] == true) {
 						for (int n = 1; n <= columns; n++) {
-							cout << " " << n;
+							cout << ' ' << n;
 						}
 						cout << endl;
 						for (int i = 0; i < rows; i++) {
-							cout << "|";
+							cout << '|';
 							for (int j = 0; j < columns; j++) {
 								if (i == rows - 1 - top[s] && j == s) {
-									if (isPlayerOne == true) {
-										board[i][j] = "X";
-									}
-									else {
-										board[i][j] = "O";
-									}
-									cout << board[i][j] << "|";
+									if (isPlayerOne == true)
+										board[i][j] = 'X';
+									else
+										board[i][j] = 'O';
+									cout << board[i][j] << '|';
 									newx = j;
 									newy = i;
 								}
-								else {
-									cout << board[i][j] << "|";
-								}
+								else
+									cout << board[i][j] << '|';
 							}
 							cout << endl;
 						}
 						cout << "No." << input << " line is already full." << endl;
-						cout << "Please select another number from 1 to 7." << endl;
+						cout << "Please select another number from 1 to " << rows << "." << endl;
 					}
 					else {
 						for (int n = 1; n <= columns; n++) {
-							cout << " " << n;
+							cout << ' ' << n;
 						}
 						cout << endl;
 						for (int i = 0; i < rows; i++) {
-							cout << "|";
+							cout << '|';
 							for (int j = 0; j < columns; j++) {
 								if (i == rows - 1 - top[s] && j == s) {
-									if (isPlayerOne == true) {
-										board[i][j] = "X";
-									}
-									else {
-										board[i][j] = "O";
-									}
-									cout << board[i][j] << "|";
+									if (isPlayerOne == true)
+										board[i][j] = 'X';
+									else
+										board[i][j] = 'O';
+									cout << board[i][j] << '|';
 									newx = j;
 									newy = i;
 								}
-								else {
-									cout << board[i][j] << "|";
-								}
+								else
+									cout << board[i][j] << '|';
 							}
 							cout << endl;
 						}
-						cout << "Please select a number between 1 to 7." << endl;
+						cout << "Please select a number between 1 to " << rows << "." << endl;
 					}
 
 				}
 				else if (select == 'B' || select == 'b') {
 					for (int n = 1; n <= columns; n++) {
-						cout << " " << n;
+						cout << ' ' << n;
 					}
 					cout << endl;
 					//that column drops down
 					for (int i = rows - 1; i >= 0; i--) {
-						if (i == 0) {
-							board[i][s] = ".";
-						}
-						else {
+						if (i == 0)
+							board[i][s] = '.';
+						else
 							board[i][s] = board[i - 1][s];
-						}
 					}
 					for (int i = 0; i < rows; i++) {
-						cout << "|";
+						cout << '|';
 						for (int j = 0; j < columns; j++) {
 							if (i == rows - 1 - top[s] && j == s) {
 								newx = j;
 								newy = i;
 							}
-							cout << board[i][j] << "|";
+							cout << board[i][j] << '|';
 						}
 						cout << endl;
 					}
@@ -296,107 +308,94 @@ void InsertOrRemove() {
 		else {
 			if (s >= 0 && s < columns && columnFull[s] == false) {
 				for (int n = 1; n <= columns; n++) {
-					cout << " " << n;
+					cout << ' ' << n;
 				}
 				cout << endl;
 				for (int i = 0; i < rows; i++) {
-					cout << "|";
+					cout << '|';
 					for (int j = 0; j < columns; j++) {
 						if (i == rows - 1 - top[s] && j == s) {
-							if (isPlayerOne == true) {
-								board[i][j] = "X";
-							}
-							else {
-								board[i][j] = "O";
-							}
-							cout << board[i][j] << "|";
+							if (isPlayerOne == true)
+								board[i][j] = 'X';
+							else
+								board[i][j] = 'O';
+							cout << board[i][j] << '|';
 							newx = j;
 							newy = i;
 						}
-						else {
-							cout << board[i][j] << "|";
-						}
+						else
+							cout << board[i][j] << '|';
 					}
 					cout << endl;
 				}
 				top[s] += 1;
-				if (top[s] == rows) {
+				if (top[s] == rows)
 					columnFull[s] = true;
-				}
 				stopSelect = true;
 			}
 			else if (s >= 0 && s <= columns && columnFull[s] == true) {
 				for (int n = 1; n <= columns; n++) {
-					cout << " " << n;
+					cout << ' ' << n;
 				}
 				cout << endl;
 				for (int i = 0; i < rows; i++) {
-					cout << "|";
+					cout << '|';
 					for (int j = 0; j < columns; j++) {
 						if (i == rows - 1 - top[s] && j == s) {
-							if (isPlayerOne == true) {
-								board[i][j] = "X";
-							}
-							else {
-								board[i][j] = "O";
-							}
-							cout << board[i][j] << "|";
+							if (isPlayerOne == true)
+								board[i][j] = 'X';
+							else
+								board[i][j] = 'O';
+							cout << board[i][j] << '|';
 							newx = j;
 							newy = i;
 						}
-						else {
-							cout << board[i][j] << "|";
-						}
+						else
+							cout << board[i][j] << '|';
 					}
 					cout << endl;
 				}
 				cout << "No." << input << " line is already full." << endl;
-				cout << "Please select another number from 1 to 7." << endl;
+				cout << "Please select a number between 1 to " << rows << "." << endl;
 			}
 			else {
 				for (int n = 1; n <= columns; n++) {
-					cout << " " << n;
+					cout << ' ' << n;
 				}
 				cout << endl;
 				for (int i = 0; i < rows; i++) {
-					cout << "|";
+					cout << '|';
 					for (int j = 0; j < columns; j++) {
 						if (i == rows - 1 - top[s] && j == s) {
-							if (isPlayerOne == true) {
-								board[i][j] = "X";
-							}
-							else {
-								board[i][j] = "O";
-							}
-							cout << board[i][j] << "|";
+							if (isPlayerOne == true)
+								board[i][j] = 'X';
+							else
+								board[i][j] = 'O';
+							cout << board[i][j] << '|';
 							newx = j;
 							newy = i;
 						}
-						else {
-							cout << board[i][j] << "|";
-						}
+						else
+							cout << board[i][j] << '|';
 					}
 					cout << endl;
 				}
-				cout << "Please select a number between 1 to 7." << endl;
+				cout << "Please select a number between 1 to " << rows << "." << endl;
 			}
-
 		}
 	} while (stopSelect == false);
 }
 
-bool IsWon() {
+void IsWon() {
 	int count = 0;
 	int winflag = 1;
-	string cur ;
+	char cur ;
 	int i, j;
 	cur = isPlayerOne == true ? 'X' : 'O';
-	
 	for (i = newx - 1, j = newy; i >= 0 && count++ < num; i--)
 	{
-		if (board[j][i] == cur) {
+		if (board[j][i] == cur)
 			winflag++;
-		}
 		else
 			break;
 	}
@@ -409,7 +408,7 @@ bool IsWon() {
 	}
 	count = 0;
 	if( winflag >= num )
-		return true;
+		isWon = true;
 	else		
 		winflag = 1;
 	
@@ -428,7 +427,7 @@ bool IsWon() {
 	}	
 	count = 0;
 	if( winflag >= num )
-		return true;	
+		isWon = true;	
 	else		
 		winflag = 1;
 
@@ -447,7 +446,7 @@ bool IsWon() {
 	}	
 	count = 0;	
 	if( winflag >= num )
-		return true;
+		isWon = true;
 	else		
 		winflag = 1;
 
@@ -466,17 +465,15 @@ bool IsWon() {
 	}	
 	count = 0;
 	if( winflag >= num )
-		return true;
+		isWon = true;
 	else		
 		winflag = 1;
-
-	return false;
 }
 
-bool IsWonWrap() {
+void IsWonWrap() {
 	int count = 0;
 	int winflag = 1;
-	string cur;
+	char cur;
 	int i, j, m, n;
 	cur = isPlayerOne == true ? 'X' : 'O';
 
@@ -484,12 +481,10 @@ bool IsWonWrap() {
 	//left
 	if (newx == 0) {
 		for (m = columns - 1, n = newy; m > newx && count++ < num; m--) {
-			if (board[n][m] == cur) {
+			if (board[n][m] == cur)
 				winflag++;
-			}
-			else {
+			else
 				break;
-			}
 		}
 	}
 	else {
@@ -498,32 +493,26 @@ bool IsWonWrap() {
 			if (i == 0 && board[j][i] == cur) {
 				winflag++;
 				for (m = columns - 1, n = newy; m > newx && count++ < num; m--) {
-					if (board[n][m] == cur) {
+					if (board[n][m] == cur)
 						winflag++;
-					}
-					else {
+					else
 						break;
-					}
 				}
 			}
-			else if (i != 0 && board[j][i] == cur) {
+			else if (i != 0 && board[j][i] == cur)
 				winflag++;
-			}
-			else {
+			else 
 				break;
-			}
 		}
 	}
 	count = 0;
 	//right
 	if (newx == columns - 1) {
 		for (m = 0, n = newy; m < newx && count++ < num; m++) {
-			if (board[n][m] == cur) {
+			if (board[n][m] == cur)
 				winflag++;
-			}
-			else {
+			else
 				break;
-			}
 		}
 	}
 	else {
@@ -531,66 +520,52 @@ bool IsWonWrap() {
 			if (i == columns - 1 && board[j][i] == cur) {
 				winflag++;
 				for (m = columns - 1, n = newy; m > newx && count++ < num; m--) {
-					if (board[n][m] == cur) {
+					if (board[n][m] == cur)
 						winflag++;
-					}
-					else {
+					else
 						break;
-					}
 				}
 			}
-			else if (i != columns - 1 && board[j][i] == cur) {
+			else if (i != columns - 1 && board[j][i] == cur)
 				winflag++;
-			}
-			else {
+			else
 				break;
-			}
 		}
 	}
 	count = 0;
-	if (winflag >= num) {
-		return true;
-	}
-	else {
+	if (winflag >= num)
+		isWonWrap = true;
+	else
 		winflag = 1;
-	}
 	
 	//up or down
 	for (i = newx, j = newy + 1; j < rows && count++ < num; j++) {
-		if (board[j][i] == cur) {
+		if (board[j][i] == cur)
 			winflag++;
-		}
-		else {
+		else
 			break;
-		}
 	}
 	count = 0;
 	for (i = newx, j = newy - 1; j >= 0 && count++ < num; j--) {
-		if (board[j][i] == cur) {
+		if (board[j][i] == cur)
 			winflag++;
-		}
-		else {
+		else
 			break;
-		}
 	}
 	count = 0;
-	if (winflag >= num) {
-		return true;
-	}
-	else {
+	if (winflag >= num)
+		isWonWrap = true;
+	else
 		winflag = 1;
-	}
 
 	//down-right or up-left
 	//down-right
 	if (newx == columns - 1 && newy != rows - 1) {
 		for (m = 0, n = newy + 1; m < newx && n < rows && count++ < num; m++, n++) {
-			if (board[n][m] == cur) {
+			if (board[n][m] == cur)
 				winflag++;
-			}
-			else {
+			else
 				break;
-			}
 		}
 	}
 	else {
@@ -598,32 +573,26 @@ bool IsWonWrap() {
 			if (i == columns - 1 && board[j][i] == cur && j != rows - 1) {
 				winflag++;
 				for (m = 0, n = newy + 1; m < newx && n < rows && count++ < num; m++, n++) {
-					if (board[n][m] == cur) {
+					if (board[n][m] == cur)
 						winflag++;
-					}
-					else {
+					else
 						break;
-					}
 				}
 			}
-			else if (i != columns - 1 && board[j][i] == cur) {
+			else if (i != columns - 1 && board[j][i] == cur)
 				winflag++;
-			}
-			else {
+			else
 				break;
-			}
 		}
 	}
 	count = 0;
 	//up-left
 	if (newx == 0 && newy != 0) {
 		for (m = columns - 1, n = newy - 1; m > newx && n>= 0 && count++ < num; m--, n--) {
-			if (board[n][m] == cur) {
+			if (board[n][m] == cur)
 				winflag++;
-			}
-			else {
+			else
 				break;
-			}
 		}
 	}
 	else {
@@ -632,40 +601,32 @@ bool IsWonWrap() {
 			if (i == 0 && board[j][i] == cur && j != 0) {
 				winflag++;
 				for (m = columns - 1, n = newy - 1; m > newx && n >= 0 && count++ < num; m--, n--) {
-					if (board[n][m] == cur) {
+					if (board[n][m] == cur)
 						winflag++;
-					}
-					else {
+					else
 						break;
-					}
 				}
 			}
-			else if (i != 0 && board[j][i] == cur) {
+			else if (i != 0 && board[j][i] == cur)
 				winflag++;
-			}
-			else {
+			else
 				break;
-			}
 		}
 	}
 	count = 0;
-	if (winflag >= num) {
-		return true;
-	}
-	else {
+	if (winflag >= num)
+		isWonWrap = true;
+	else
 		winflag = 1;
-	}
 
 	//down-left or up-right
 	//down-left
 	if (newx == 0 && newy != rows - 1) {
 		for (m = columns - 1, n = newy + 1; m > newx && n < rows && count++ < num; m--, n++) {
-			if (board[n][m] == cur) {
+			if (board[n][m] == cur)
 				winflag++;
-			}
-			else {
+			else
 				break;
-			}
 		}
 	}
 	else {
@@ -674,32 +635,26 @@ bool IsWonWrap() {
 			if (i == 0 && board[j][i] == cur && j != rows - 1) {
 				winflag++;
 				for (m = columns - 1, n = newy + 1; m > newx && n < rows && count++ < num; m--, n++) {
-					if (board[n][m] == cur) {
+					if (board[n][m] == cur)
 						winflag++;
-					}
-					else {
+					else
 						break;
-					}
 				}
 			}
-			else if (i != 0 && board[j][i] == cur) {
+			else if (i != 0 && board[j][i] == cur)
 				winflag++;
-			}
-			else {
+			else
 				break;
-			}
 		}
 	}
 	count = 0;
 	//up-right
 	if (newx == columns - 1 && newy != 0) {
 		for (m = 0, n = newy - 1; m < newx && n >= 0 && count++ < num; m++, n--) {
-			if (board[n][m] == cur) {
+			if (board[n][m] == cur)
 				winflag++;
-			}
-			else {
+			else
 				break;
-			}
 		}
 	}
 	else {
@@ -707,69 +662,54 @@ bool IsWonWrap() {
 			if (i == columns - 1 && board[j][i] == cur && j != 0) {
 				winflag++;
 				for (m = 0, n = newy - 1; m < newx && n >= 0 && count++ < num; m++, n--) {
-					if (board[n][m] == cur) {
+					if (board[n][m] == cur)
 						winflag++;
-					}
-					else {
+					else
 						break;
-					}
 				}
 			}
-			else if (i != columns - 1 && board[j][i] == cur) {
+			else if (i != columns - 1 && board[j][i] == cur)
 				winflag++;
-			}
-			else {
+			else
 				break;
-			}
 		}
 	}
 	count = 0;
-	if (winflag >= num) {
-		return true;
-	}
-	else {
+	if (winflag >= num)
+		isWonWrap = true;
+	else
 		winflag = 1;
-	}
-	return false;
 }
 
 void SwitchPlayer() {
-	if (isPlayerOne) {
+	if (isPlayerOne)
 		isPlayerOne = false;
-	}
-	else {
+	else
 		isPlayerOne = true;
-	}
 }
 
-bool IsTie() {
+void IsTie() {
 	int fullLine = 0;
 	for (int i = 0; i < columns; i++) {
-		if (top[i] == rows) {
+		if (top[i] == rows)
 			fullLine += 1;
-		}
 	}
-	if (fullLine == columns) {
-		return true;
-	}
+	if (fullLine == columns)
+		isTie = true;
 }
 
-bool StopGame() {
-	if (IsTie() == true) {
-		cout << "The game ended in a draw." << endl;
-		return true;
-	}
-	if (IsTie() == false || IsWon() == true || IsWonWrap() == true) {
-		if (isPlayerOne) {
+void StopGame() {
+	if (isWon == true || isWonWrap == true) {
+		if (isPlayerOne)
 			cout << "Player X won!" << endl;
-			return true;
-		}
-		else {
+		else
 			cout << "Player O won!" << endl;
-			return true;
-		}
+		stopGame = true;
 	}
-	return false;
+	else if (isWon == false && isWonWrap == false && isTie == true) {
+		cout << "The game ended in a draw." << endl;
+		stopGame = true;
+	}
 }
 
 void RestartGame() {
@@ -786,6 +726,7 @@ void RestartGame() {
 			keepAsk = false;
 		}
 		else if (choose == 'N' || choose == 'n') {
+			system("cls");
 			cout << "See you next time!" << endl;
 			restartGame = false;
 			keepAsk = false;
