@@ -1,6 +1,4 @@
 #include<iostream>
-#include<string>
-#include<limits>
 using namespace std;
 
 void GameSetUp();
@@ -19,7 +17,6 @@ int top[20];
 char board[20][20];
 bool columnFull[20];
 int newx, newy;
-int keepNewX, keepNewY;
 bool isPlayerOne = true;
 bool isWon = false;
 bool isWonWrap = false;
@@ -28,7 +25,6 @@ bool stopGame = false;
 bool restartGame = true;
 bool wrap = false;
 bool drop = false;
-bool checkDone = false;
 int xWon = 0, oWon = 0;
 
 int main() {
@@ -144,8 +140,6 @@ void InsertOrRemove() {
 	bool stopSelect = false;
 	char cur;
 	cur = isPlayerOne == true ? 'X' : 'O';
-	int checkInput;
-	bool validInput = false;
 	do {
 		cin >> input;
 		while (!cin.good()) { //to avoid user input letters or words
@@ -254,7 +248,6 @@ void InsertOrRemove() {
 						}
 						cout << "Please select a number between 1 to " << rows << "." << endl;
 					}
-					checkDone = true;
 				}
 				else if (select == 'B' || select == 'b') { //remove a piece from the bottom of that column
 					for (int n = 1; n <= columns; n++) {
@@ -315,7 +308,7 @@ void InsertOrRemove() {
 					columnFull[s] = true;
 				stopSelect = true;
 			}
-			else if (s >= 0 && s <= columns && columnFull[s] == true) {
+			else if (s >= 0 && s < columns && columnFull[s] == true) { //that column already full
 				for (int n = 1; n <= columns; n++) {
 					cout << ' ' << n;
 				}
@@ -340,7 +333,7 @@ void InsertOrRemove() {
 				cout << "No." << input << " line is already full." << endl;
 				cout << "Please select a number between 1 to " << rows << "." << endl;
 			}
-			else {
+			else { //input a number that out range
 				for (int n = 1; n <= columns; n++) {
 					cout << ' ' << n;
 				}
@@ -364,22 +357,29 @@ void InsertOrRemove() {
 				}
 				cout << "Please select a number between 1 to " << rows << "." << endl;
 			}
-			checkDone = true;
 		}
 	} while (stopSelect == false);
-	keepNewX = newx;
-	keepNewY = newy;
 	IsTie();
-	for (int i = 1; i <= top[s]; i++) {
-		if (newy >= rows - top[s]) {
-			if (wrap == false)//Wrap Around Mode On/Off
-				IsWon();
-			else
-				IsWonWrap();
-			newy--;
-			WonRecord();
+	if (drop == true) {//Remove Mode On
+		for (int i = 1; i <= top[s]; i++) {
+			if (newy >= rows - top[s]) {
+				if (wrap == false)//Wrap Around Mode On/Off
+					IsWon();
+				else
+					IsWonWrap();
+				newy--;
+				WonRecord();
+			}
 		}
 	}
+	else { //remove mode off
+		if (wrap == false)
+			IsWon();
+		else
+			IsWonWrap();
+		WonRecord();
+	}
+	
 }
 
 void IsTie() {
@@ -482,7 +482,6 @@ void IsWonWrap() {
 	char cur;
 	int i, j, m, n;
 	cur = board[newy][newx] == 'X' ? 'X' : 'O';
-
 	//left or right
 	//left
 	if (newx == 0) {
@@ -543,7 +542,6 @@ void IsWonWrap() {
 		isWonWrap = true;
 	else
 		winflag = 1;
-	
 	//up or down
 	for (i = newx, j = newy + 1; j < rows && count++ < num; j++) {
 		if (board[j][i] == cur)
@@ -563,7 +561,6 @@ void IsWonWrap() {
 		isWonWrap = true;
 	else
 		winflag = 1;
-
 	//down-right or up-left
 	//down-right
 	if (newx == columns - 1 && newy != rows - 1) {
@@ -624,7 +621,6 @@ void IsWonWrap() {
 		isWonWrap = true;
 	else
 		winflag = 1;
-
 	//down-left or up-right
 	//down-left
 	if (newx == 0 && newy != rows - 1) {
@@ -689,7 +685,7 @@ void IsWonWrap() {
 
 void WonRecord() {
 	if (isWon == true || isWonWrap == true) {
-		if (board[newy][newy] == 'X')
+		if (board[newy][newx] == 'X')
 			xWon++;
 		else
 			oWon++;
@@ -714,16 +710,9 @@ void StopGame() {
 		stopGame = true;
 	}
 	else if (oWon > 0 && xWon == 0) {
-		cout << "Player X won!" << endl;
+		cout << "Player O won!" << endl;
 		stopGame = true;
 	}
-	/*if (isWon == true || isWonWrap == true) {
-		if (board[keepNewY][keepNewX] == 'X')
-			cout << "Player X won!" << endl;
-		else
-			cout << "Player O won!" << endl;
-		stopGame = true;
-	}*/
 	else if (isWon == false && isWonWrap == false && isTie == true) {
 		cout << "The game ended in a draw." << endl;
 		stopGame = true;
